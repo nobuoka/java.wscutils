@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 
 public class JsonNull implements JsonValue {
 	
-	static final public JsonNull VALUE = new JsonNull();
+	public static final JsonNull VALUE = new JsonNull();
+	private static final String CLASS_NAME  = "JsonNull";
 	
 	private JsonNull() {}
 
@@ -15,32 +16,37 @@ public class JsonNull implements JsonValue {
 
 	@Override
 	public JsonArray arrayValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object, so " +
+				"this method is not supported." );
 	}
 
 	@Override
 	public JsonObject objectValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object, so " +
+				"this method is not supported." );
 	}
 
 	@Override
 	public BigDecimal numberValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object, so " +
+				"this method is not supported." );
 	}
 
 	@Override
 	public String stringValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object, so " +
+				"this method is not supported." );
 	}
 
 	@Override
 	public boolean booleanValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object, so " +
+				"this method is not supported." );
 	}
 	
 	@Override

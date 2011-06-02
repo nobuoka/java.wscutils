@@ -6,6 +6,8 @@ import java.util.HashMap;
 public class JsonObject extends HashMap<String,JsonValue> implements JsonValue {
 
 	private static final long serialVersionUID = -898362213984847287L;
+	private static final String CLASS_NAME  = "JsonObject";
+	private static final String METHOD_NAME = "objectValue()";
 	
 	public JsonObject() {
 		super();
@@ -18,32 +20,35 @@ public class JsonObject extends HashMap<String,JsonValue> implements JsonValue {
 
 	@Override
 	public JsonArray arrayValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public JsonObject objectValue() {
-		// TODO Auto-generated method stub
 		return this;
 	}
 
 	@Override
 	public BigDecimal numberValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public String stringValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public boolean booleanValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 }

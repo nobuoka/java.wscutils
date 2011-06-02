@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 
 public class JsonBoolean implements JsonValue {
 	
+	private static final String CLASS_NAME  = "JsonBoolean";
+	private static final String METHOD_NAME = "booleanValue()";
+	
 	private boolean val;
 	
 	private JsonBoolean( boolean b ) {
@@ -20,31 +23,34 @@ public class JsonBoolean implements JsonValue {
 
 	@Override
 	public JsonArray arrayValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public JsonObject objectValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public BigDecimal numberValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public String stringValue() {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
+		throw new UnsupportedOperationException( 
+				"This object is a " + CLASS_NAME + " object. " +
+				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
 	}
 
 	@Override
 	public boolean booleanValue() {
-		// TODO Auto-generated method stub
 		return val;
 	}
 	
