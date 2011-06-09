@@ -14,6 +14,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class OAuthRequestHelper {
 	
+	/**
+	 * リクエスト時に送信する単一のパラメータを表すクラス.
+	 * @author nobuoka
+	 *
+	 */
 	static public class Param {
 		private String mKey;
 		private String mValue;
@@ -25,6 +30,14 @@ public class OAuthRequestHelper {
 		public String getValue() { return mValue; }
 	}
 	
+	/**
+	 * パラメータ同士の比較を行うためのクラス.
+	 * OAuth 認証では, パラメータを並べ替える必要があり, 
+	 * その際にこのクラスのインスタンスを使用する
+	 * 
+	 * @author nobuoka
+	 *
+	 */
 	static public class ParamComparator implements Comparator<Param> {
 		private ParamComparator() {}
 		@Override
@@ -45,13 +58,22 @@ public class OAuthRequestHelper {
 		}
 	}
 	
+	/**
+	 * パラメータ (Param オブジェクト) のリストを表すクラス.
+	 * 実装としては ArrayList<Param> であり, 
+	 * パラメータの追加を行いやすいように 2 次元の 
+	 * String 型配列を受け取るコンストラクタと addAll メソッドが追加されている. 
+	 * 
+	 * @author nobuoka
+	 *
+	 */
 	static public class ParamList extends ArrayList<Param> {
 		private static final long serialVersionUID = -849036503227560868L;
 		public ParamList() {
 			super();
 		}
 		public ParamList( String[][] paramStrs ) {
-			super();
+			super( paramStrs.length );
 			addAll( paramStrs );
 		}
 		public void addAll( String[][] paramStrs ) {
@@ -65,13 +87,13 @@ public class OAuthRequestHelper {
 		}
 	}
 	
-	static final private byte[] NONCE_SEED_BYTES = 
+	private static final byte[] NONCE_SEED_BYTES = 
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 		.getBytes( Charset.forName( "US-ASCII" ) );
-	static public String getNonceString() {
+	public static String getNonceString() {
 		return getNonceString( 16 );
 	}
-	static public String getNonceString( int length ) {
+	public static String getNonceString( int length ) {
 		SecureRandom rand = new SecureRandom();
 		byte[] bytes = new byte[ length ];
 		for( int i = 0; i < length; i++ ) {
@@ -136,7 +158,7 @@ public class OAuthRequestHelper {
 		Mac mac = Mac.getInstance( algorithmName );
 		mac.init( sks );
 		byte[] digest = mac.doFinal( signatureBaseStr.getBytes( Charset.forName( "US-ASCII" ) ) );
-		String signatureStr = new String( Base64Encoder.encode( digest ), Charset.forName( "US-ASCII" ) );
+		String signatureStr = Base64Encoder.encode( digest );
 		mOauthParams.add( new Param( "oauth_signature", signatureStr ) );
 	}
 	
@@ -152,6 +174,18 @@ public class OAuthRequestHelper {
 		Param[] params = paramList.toArray( new Param[ paramList.size() ] );
 		return mUrlStr + "?" + toNormalizationString( params );
 	}
+
+	public String getRequestBodyString() {
+		return getRequestBodyString( false );
+	}
+	public String getRequestBodyString( boolean includeOAuthParams ) {
+		ParamList paramList = new ParamList();
+		if( includeOAuthParams && mOauthParams != null ) paramList.addAll( mOauthParams );
+		if( mReqBodyParams != null ) paramList.addAll( mReqBodyParams );
+		if( paramList.size() == 0 ) return "";
+		Param[] params = paramList.toArray( new Param[ paramList.size() ] );
+		return toNormalizationString( params );
+	}
 	
 	public String getAuthorizationHeaderString( String realmStr ) {
 		// OAuth ヘッダ
@@ -164,75 +198,5 @@ public class OAuthRequestHelper {
 		}
 		return sb.toString();
 	}
-	
-	/*
-	public void connect() {
-		String urlStr = "https://userstream.twitter.com/2/user.json";
-		String method = "GET";
-		String secretsStr = "tRJ5IJPbVtmT83Z5rIc11usVd0CS5HiUEPnORX97aw&GA2tiYSAWesCpbytiMizmYWAXdabcqnhpMRHLIJE";
-		
-		ArrayList<ReqParam> params = new ArrayList<ReqParam>();
-		params.add( new ReqParam( "oauth_consumer_key", "9VOTgNEOD5asafMKffYl3Q" ) );
-		params.add( new ReqParam( "oauth_nonce", "randomString" ) );
-		params.add( new ReqParam( "oauth_signature_method", "HMAC-SHA1" ) );
-		params.add( new ReqParam( "oauth_timestamp", Long.toString( new Date().getTime() / 1000 ) ) );
-		params.add( new ReqParam( "oauth_token", "59411342-GC0DyjBY73x6bAYeT82xNKVgbXnMCv8hOqguXRKWM" ) );
-		params.add( new ReqParam( "oauth_version", "1.0" ) );
-		
-		URL url = new URL( urlStr );
-		URLConnection tmpConn = url.openConnection();
-		System.out.println( tmpConn instanceof HttpURLConnection );
-		conn = (HttpURLConnection)tmpConn;
-		
-		// consumer key : 9VOTgNEOD5asafMKffYl3Q
-		StringBuilder sb = new StringBuilder();
-		for( ReqParam p : params ) {
-			if( sb.length() != 0 ) {
-				sb.append( "&" );
-			}
-			sb.append( OAuthEncoder.encode( p.key ) + "=" + OAuthEncoder.encode( p.value ) );
-		}
-		String paramsStr = sb.toString();
-		String signatureBaseStr = OAuthEncoder.encode( method ) + '&' + 
-			OAuthEncoder.encode( urlStr ) + '&' + OAuthEncoder.encode( paramsStr );
-		System.out.println( signatureBaseStr );
-		
-		// ====
-		String signatureStr = null;
-		try {
-			String algorithmName = "HmacSHA1";
-			SecretKeySpec sks = new SecretKeySpec( 
-					secretsStr.getBytes( Charset.forName( "US-ASCII" ) ), algorithmName );
-			Mac mac = Mac.getInstance( algorithmName );
-			//TODO
-			mac.init( sks );
-			byte[] digest = mac.doFinal( signatureBaseStr.getBytes( "US-ASCII" ) );
-			// TODO
-			signatureStr = new String( Base64Encoder.encode( digest ), Charset.forName( "US-ASCII" ) );
-			//MessageDigest md = MessageDigest.getInstance( "SHA-1" );
-		} catch( NoSuchAlgorithmException err ) {
-			// TODO Auto-generated catch block
-			err.printStackTrace();
-		} catch( InvalidKeyException err ) {
-			// TODO Auto-generated catch block
-			err.printStackTrace();
-		}
-		System.out.println( signatureStr );
-		params.add( new ReqParam( "oauth_signature", signatureStr ) );
-		
-		// OAuth ヘッダ
-		sb = new StringBuilder();
-		sb.append( "OAuth realm=\"\"" );
-		for( ReqParam p : params ) {
-			sb.append( ", " );
-			sb.append( OAuthEncoder.encode( p.key ) + "=\"" + OAuthEncoder.encode( p.value ) + "\"" );
-		}
-		String oauthHeaderStr = sb.toString();
-		
-		conn.setRequestProperty( "Authorization", oauthHeaderStr );
-		System.out.println( oauthHeaderStr );
-		
-	}
-	*/
 	
 }

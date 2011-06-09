@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 
+/**
+ * Base64 エンコードを行う処理を提供するクラス.
+ * @author nobuoka
+ *
+ */
 public class Base64Encoder {
 	
 	static final private byte[] CONVERT_TABLE = 
@@ -46,7 +51,15 @@ public class Base64Encoder {
 		}
 	}
 	
-	static public byte[] encode( byte[] bytes ) {
+	// cant instantiate from this class
+	private Base64Encoder() {}
+	
+	/**
+	 * バイト列を Base64 エンコードする.
+	 * @param bytes Base64 エンコードを行う対象のバイト列
+	 * @return bytes を Base64 エンコードした結果の文字列
+	 */
+	static public String encode( byte[] bytes ) {
 		ByteArrayOutputStream os = null;
 		byte[] res = null;
 		try {
@@ -69,7 +82,7 @@ public class Base64Encoder {
 				err.printStackTrace();
 			}
 		}
-		return res;
+		return new String( res, Charset.forName( "US-ASCII" ) );
 	}
 	
 }
