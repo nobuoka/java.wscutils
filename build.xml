@@ -4,7 +4,9 @@
   <target name="build" depends="compile,jar" />
   <target name="compile">
     <mkdir dir="./bin" />
-    <javac srcdir="./src" destdir="./bin" />
+    <javac srcdir="./src" destdir="./bin">
+      <include name="**/*.java" />
+    </javac>
   </target>
   <target name="jar">
     <mkdir dir="./jar" />
