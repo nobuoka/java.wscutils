@@ -50,7 +50,7 @@ public class JsonBoolean implements JsonValue {
 	}
 
 	@Override
-	public boolean booleanValue() {
+	public Boolean booleanValue() {
 		return val;
 	}
 	

@@ -3,6 +3,8 @@ package info.vividcode.util.json;
 
 import static org.junit.Assert.*;
 
+import java.math.BigDecimal;
+
 import org.junit.Test;
 
 public class JsonParserTest {
@@ -45,6 +47,23 @@ public class JsonParserTest {
 		String jsonString = "{}";
 		JsonObject jobject = JsonParser.parse( jsonString ).objectValue();
 		assertEquals( 0, jobject.size() );
+	}
+	
+	/**
+	 * JSON Number パージングをテストする.
+	 */
+	@Test
+	public void testNumberParsing() {
+		String jsonString = null;
+		String[] targetNumStrs = new String[]{
+			"200", "-0", "5.60", "8888.8888E-10"
+		};
+		for( String s : targetNumStrs ) {
+			jsonString = "[ " + s + " ]";
+			JsonValue v = JsonParser.parse( jsonString ).arrayValue().get( 0 );
+			assertEquals( JsonValue.ValueType.NUMBER_VALUE, v.valueType() );
+			assertEquals( new BigDecimal( s ), v.numberValue() );
+		}
 	}
 	
 }

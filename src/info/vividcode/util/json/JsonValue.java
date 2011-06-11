@@ -16,5 +16,5 @@ public interface JsonValue {
 	public JsonObject objectValue();
 	public BigDecimal numberValue();
 	public String  stringValue();
-	public boolean booleanValue();
+	public Boolean booleanValue();
 }

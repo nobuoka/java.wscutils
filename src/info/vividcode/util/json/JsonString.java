@@ -39,7 +39,7 @@ public class JsonString implements JsonValue {
 		return val;
 	}
 	@Override
-	public boolean booleanValue() {
+	public Boolean booleanValue() {
 		throw new UnsupportedOperationException( 
 				"This object is a " + CLASS_NAME + " object. " +
 				"If you want to get the value, please use the " + METHOD_NAME + " method instead." );

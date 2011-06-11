@@ -47,7 +47,7 @@ public class JsonArray extends ArrayList<JsonValue> implements JsonValue {
 	}
 	
 	@Override
-	public boolean booleanValue() {
+	public Boolean booleanValue() {
 		throw new UnsupportedOperationException( 
 				"This object is a " + CLASS_NAME + " object. " +
 				"if you want to get the value, please use the " + METHOD_NAME + " method instead." );
