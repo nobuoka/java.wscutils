@@ -7,9 +7,9 @@ public class JsonBoolean implements JsonValue {
 	private static final String CLASS_NAME  = "JsonBoolean";
 	private static final String METHOD_NAME = "booleanValue()";
 	
-	private boolean val;
+	private Boolean val;
 	
-	private JsonBoolean( boolean b ) {
+	private JsonBoolean( Boolean b ) {
 		val = b;
 	}
 
@@ -57,6 +57,16 @@ public class JsonBoolean implements JsonValue {
 	@Override
 	public String toString() {
 		return "[JSON boolean : " + ( val ? "true" : "false" ) + "]";
+	}
+	
+	@Override
+	public boolean equals( Object o ) {
+		if( o instanceof JsonBoolean ) {
+			JsonBoolean oo = (JsonBoolean) o;
+			return this.val.equals( oo.val );
+		} else {
+			return false;
+		}
 	}
 
 }

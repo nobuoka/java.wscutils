@@ -59,5 +59,15 @@ public class JsonNumber implements JsonValue {
 	public String toString() {
 		return "[JSON number : " + val.toString() + "]";
 	}
+	
+	@Override
+	public boolean equals( Object o ) {
+		if( o instanceof JsonNumber ) {
+			JsonNumber oo = (JsonNumber) o;
+			return this.val.equals( oo.val );
+		} else {
+			return false;
+		}
+	}
 
 }

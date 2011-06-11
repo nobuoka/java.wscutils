@@ -7,9 +7,9 @@ public class JsonString implements JsonValue {
 	private static final String CLASS_NAME  = "JsonString";
 	private static final String METHOD_NAME = "stringValue()";
 	
-	private String str;
+	private String val;
 	public JsonString( String str ) {
-		this.str = str;
+		this.val = str;
 	}
 	
 	@Override
@@ -36,7 +36,7 @@ public class JsonString implements JsonValue {
 	}
 	@Override
 	public String stringValue() {
-		return str;
+		return val;
 	}
 	@Override
 	public boolean booleanValue() {
@@ -48,8 +48,18 @@ public class JsonString implements JsonValue {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		JsonSerializer.serializeJString( sb, str );
+		JsonSerializer.serializeJString( sb, val );
 		return "[Json string : " + sb.toString() + "]";
+	}
+	
+	@Override
+	public boolean equals( Object o ) {
+		if( o instanceof JsonString ) {
+			JsonString oo = (JsonString) o;
+			return this.val.equals( oo.val );
+		} else {
+			return false;
+		}
 	}
 
 }
