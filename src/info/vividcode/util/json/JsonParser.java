@@ -2,7 +2,19 @@ package info.vividcode.util.json;
 
 import java.math.BigDecimal;
 
+/**
+ *JSON 文字列をパースする機能を提供するクラス.
+ *<pre><code>  // パース対象の JSON 文字列
+ *  String jsonStr = "[ 50, 200 ]";
+ *  // パースする
+ *  JsonValue jsonObj = JsonParser.parse( jsonStr );
+ *  // 現在は JsonArray であることがわかっているので, JsonArray として扱う
+ *  BigDecimal num1 = jsonObj.arrayValue().get( 0 ).numberValue();
+ *  BigDecimal num2 = jsonObj.arrayValue().get( 1 ).numberValue();</code></pre>
+ */
 public class JsonParser {
+	
+	private JsonParser() {}
 	
 	private static class CodePointIterator {
 		private String str;
@@ -389,6 +401,11 @@ public class JsonParser {
 		return jarray;
 	}
 	
+	/**
+	 *JSON 文字列をパースして, 結果を JsonValue として返す.
+	 *@param jsonStr パース対象の JSON 文字列
+	 *@return jsonStr をパースした結果の JSON オブジェクト
+	 */
 	static public JsonValue parse( String jsonStr ) {
 		// array or obj?
 		Tokenizer t = new Tokenizer( jsonStr );

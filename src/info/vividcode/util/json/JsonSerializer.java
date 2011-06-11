@@ -6,7 +6,18 @@ import java.util.Set;
 
 import info.vividcode.util.json.JsonValue.ValueType;
 
+/**
+ *JSON オブジェクトをシリアライズする機能を提供するクラス.
+ *<pre><code>  // シリアライズ対象の JSON オブジェクト
+ *  JsonArray jsonArray = new JsonArray();
+ *  jsonArray.add( new JsonString( "テスト\t改行も\n" ) );
+ *  // シリアライズして出力
+ *  System.out.println( JsonSerializer.serialize( jsonArray ) );
+ *      // ["テスト\t改行も\n"]</code></pre>
+ */
 public class JsonSerializer {
+	
+	private JsonSerializer() {}
 	
 	static private void serializeJObject( StringBuilder sb, JsonObject jobject, Set<Object> ancestorIdSet ) {
 		// 先祖に自分自身が存在するかどうかチェック
@@ -126,6 +137,11 @@ public class JsonSerializer {
 	private static final String ERRMSG_NOT_OBJ_OR_ARR_SERIALIZATION = 
 		"The JSON Value which is serialization target must be JsonObject or JsonArray.";
 	
+	/**
+	 *JSON オブジェクトをシリアライズして JSON 文字列を返す.
+	 *@param jvalue シリアライズ対象の JSON オブジェクト
+	 *@return jvalue をシリアライズした結果の JSON 文字列
+	 */
 	static public String serialize( JsonValue jvalue ) {
 		// array か object でなければいけない
 		if( jvalue.valueType() != ValueType.ARRAY_VALUE && 
