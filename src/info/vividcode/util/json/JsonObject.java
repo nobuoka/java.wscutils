@@ -8,9 +8,11 @@ public class JsonObject extends HashMap<String,JsonValue> implements JsonValue {
 	private static final long serialVersionUID = -898362213984847287L;
 	private static final String CLASS_NAME  = "JsonObject";
 	private static final String METHOD_NAME = "objectValue()";
+	final Object ID;
 	
 	public JsonObject() {
 		super();
+		ID = new Object();
 	}
 
 	@Override

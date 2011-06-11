@@ -8,9 +8,11 @@ public class JsonArray extends ArrayList<JsonValue> implements JsonValue {
 	private static final long serialVersionUID = -8694573603186652059L;
 	private static final String CLASS_NAME  = "JsonArray";
 	private static final String METHOD_NAME = "arrayValue()";
+	final Object ID;
 	
 	public JsonArray() {
 		super();
+		ID = new Object();
 	}
 	
 	@Override

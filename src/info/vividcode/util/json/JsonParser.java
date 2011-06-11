@@ -20,6 +20,9 @@ public class JsonParser {
 			return index < length;
 		}
 		public int next() {
+			if( length <= index ) {
+				return -1;
+			}
 			int cp = str.codePointAt( index );
 			index += Character.charCount( cp );
 			return cp;
@@ -124,6 +127,7 @@ public class JsonParser {
 					return Token.TRUE;
 			}
 			
+			/* -, 0-9 */
 			if( firstCharCP == 0x2D || ( 0x30 <= firstCharCP && firstCharCP <= 0x39 ) ) {
 				return getNextNumberToken( cpi, firstCharCP );
 			}
@@ -390,7 +394,7 @@ public class JsonParser {
 		Tokenizer t = new Tokenizer( jsonStr );
 		Token token = t.getNextToken();
 		if( token == null ) {
-			throw new RuntimeException( "invalid JSON string (\"" + jsonStr + "\")" );
+			throw new InvalidJsonException( "invalid JSON string (\"" + jsonStr + "\")" );
 		}
 		JsonValue val = null;
 		if( token.type == Token.TokenType.BEGIN_ARRAY ) {
@@ -398,7 +402,7 @@ public class JsonParser {
 		} else if( token.type == Token.TokenType.BEGIN_OBJECT ) {
 			val = parseObject( t, new JsonObject() );
 		} else {
-			throw new RuntimeException();
+			throw new InvalidJsonException( "The passed string is invalid [" + jsonStr + "]" );
 		}
 		if( ( token = t.getNextToken() ) != null ) {
 			throw new RuntimeException();
