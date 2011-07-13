@@ -17,9 +17,15 @@ import info.vividcode.util.json.JsonValue.ValueType;
  */
 public class JsonSerializer {
 	
-	private JsonSerializer() {}
+	private boolean mDoIndent;
+	private int mIndentDepth;
 	
-	static private void serializeJObject( StringBuilder sb, JsonObject jobject, Set<Object> ancestorIdSet ) {
+	private JsonSerializer( boolean doIndent ) {
+		mDoIndent = doIndent;
+		mIndentDepth = 0;
+	}
+	
+	private void serializeJObject( StringBuilder sb, JsonObject jobject, Set<Object> ancestorIdSet ) {
 		// 先祖に自分自身が存在するかどうかチェック
 		if( ancestorIdSet.contains( jobject.ID ) ) {
 			throw new InvalidJsonException( "Can't serialize a recursive JSON structure" );
@@ -28,23 +34,45 @@ public class JsonSerializer {
 		sb.append( "{" );
 		String[] keys = jobject.keySet().toArray( new String[0] );
 		if( keys.length != 0 ) {
+			if( mDoIndent ) {
+				++ mIndentDepth;
+				sb.append( "\n" );
+				for( int c = 0; c < mIndentDepth; ++ c ) sb.append( "  " );
+			}
 			String key = keys[0];
 			serializeJString( sb, key );
-			sb.append( ":" );
+			if( mDoIndent ) {
+				sb.append( " : " );
+			} else {
+				sb.append( ":" );
+			}
 			serializeAnyJValue( sb, jobject.get( key ), ancestorIdSet );
-		}
-		for( int i = 1; i < keys.length; i++ ) {
-			sb.append( "," );
-			String key = keys[i];
-			serializeJString( sb, key );
-			sb.append( ":" );
-			serializeAnyJValue( sb, jobject.get( key ), ancestorIdSet );
+			for( int i = 1; i < keys.length; i++ ) {
+				sb.append( "," );
+				if( mDoIndent ) {
+					sb.append( "\n" );
+					for( int c = 0; c < mIndentDepth; ++ c ) sb.append( "  " );
+				}
+				key = keys[i];
+				serializeJString( sb, key );
+				if( mDoIndent ) {
+					sb.append( " : " );
+				} else {
+					sb.append( ":" );
+				}
+				serializeAnyJValue( sb, jobject.get( key ), ancestorIdSet );
+			}
+			if( mDoIndent ) {
+				-- mIndentDepth;
+				sb.append( "\n" );
+				for( int c = 0; c < mIndentDepth; ++c ) sb.append( "  " );
+			}
 		}
 		sb.append( "}" );
 		ancestorIdSet.remove( jobject.ID );
 	}
 	
-	static private void serializeJArray( StringBuilder sb, JsonArray jarray, Set<Object> ancestorIdSet ) {
+	private void serializeJArray( StringBuilder sb, JsonArray jarray, Set<Object> ancestorIdSet ) {
 		// 先祖に自分自身が存在するかどうかチェック
 		if( ancestorIdSet.contains( jarray.ID ) ) {
 			throw new InvalidJsonException( "Can't serialize a recursive JSON structure" );
@@ -53,11 +81,25 @@ public class JsonSerializer {
 		sb.append( "[" );
 		JsonValue[] vs = jarray.toArray( new JsonValue[0] );
 		if( vs.length != 0 ) {
+			if( mDoIndent ) {
+				++ mIndentDepth;
+				sb.append( "\n" );
+				for( int c = 0; c < mIndentDepth; ++ c ) sb.append( "  " );
+			}
 			serializeAnyJValue( sb, vs[0], ancestorIdSet );
-		}
-		for( int i = 1; i < vs.length; i++ ) {
-			sb.append( "," );
-			serializeAnyJValue( sb, vs[i], ancestorIdSet );
+			for( int i = 1; i < vs.length; i++ ) {
+				sb.append( "," );
+				if( mDoIndent ) {
+					sb.append( "\n" );
+					for( int c = 0; c < mIndentDepth; ++ c ) sb.append( "  " );
+				}
+				serializeAnyJValue( sb, vs[i], ancestorIdSet );
+			}
+			if( mDoIndent ) {
+				-- mIndentDepth;
+				sb.append( "\n" );
+				for( int c = 0; c < mIndentDepth; ++c ) sb.append( "  " );
+			}
 		}
 		sb.append( "]" );
 		ancestorIdSet.remove( jarray.ID );
@@ -103,7 +145,7 @@ public class JsonSerializer {
 		sb.append( dec.toString() );
 	}
 	
-	static void serializeAnyJValue( StringBuilder sb, JsonValue jvalue, Set<Object> ancestorIdSet ) {
+	private void serializeAnyJValue( StringBuilder sb, JsonValue jvalue, Set<Object> ancestorIdSet ) {
 		//if( jvalue == null ) {
 		//	sb.append( "null" );
 		//} else {
@@ -143,6 +185,15 @@ public class JsonSerializer {
 	 *@return jvalue をシリアライズした結果の JSON 文字列
 	 */
 	static public String serialize( JsonValue jvalue ) {
+		return serialize( jvalue, false );
+	}
+	
+	/**
+	 *JSON オブジェクトをシリアライズして JSON 文字列を返す.
+	 *@param jvalue シリアライズ対象の JSON オブジェクト
+	 *@return jvalue をシリアライズした結果の JSON 文字列
+	 */
+	static public String serialize( JsonValue jvalue, boolean doIndent ) {
 		// array か object でなければいけない
 		if( jvalue.valueType() != ValueType.ARRAY_VALUE && 
 				jvalue.valueType() != ValueType.OBJECT_VALUE ) {
@@ -150,7 +201,7 @@ public class JsonSerializer {
 			throw new InvalidJsonException( ERRMSG_NOT_OBJ_OR_ARR_SERIALIZATION );
 		}
 		StringBuilder sb = new StringBuilder();
-		serializeAnyJValue( sb, jvalue, new HashSet<Object>() );
+		new JsonSerializer( doIndent ).serializeAnyJValue( sb, jvalue, new HashSet<Object>() );
 		return sb.toString();
 	}
 	
