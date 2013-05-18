@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'info.vividcode.utils'
+version = '0.1.0'
+
+description = "WSCUtils includes utilities for web service client."
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+tasks.withType(Compile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenRepo url: "http://repo.maven.apache.org/maven2"
+}
+dependencies {
+    testCompile group: 'junit', name: 'junit', version:'4.11'
+}
