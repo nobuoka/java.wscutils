@@ -1,14 +1,14 @@
 /**
- *JSON を扱うためのパッケージ. 
- *各種 JSON オブジェクト (Array, Object, String, Number, String, Boolean, Null) 
+ *JSON を扱うためのパッケージ.
+ *各種 JSON オブジェクト (Array, Object, String, Number, String, Boolean, Null)
  *を表すクラスと, パーサー, シリアライザーから成る.
- *<p> 
- *各種 JSON オブジェクトを表すためのクラスは JsonValue インターフェイスを実装しており, 
- *実際の値を取得するためには xxxxValue メソッド (xxxx は "array" や "string" など) 
- *を使用する. 
- *例えば, JSON の string を表すためのクラスは JsonString であり, 
+ *<p>
+ *各種 JSON オブジェクトを表すためのクラスは JsonValue インターフェイスを実装しており,
+ *実際の値を取得するためには xxxxValue メソッド (xxxx は "array" や "string" など)
+ *を使用する.
+ *例えば, JSON の string を表すためのクラスは JsonString であり,
  *実際の値 (String オブジェクト) を取得するには stringValue メソッドを使用する.
- *<pre><code>  // インスタンスはコンストラクタに String オブジェクトを渡して生成する 
+ *<pre><code>  // インスタンスはコンストラクタに String オブジェクトを渡して生成する
  *  JsonString js = new JsonString( "テスト" );
  *  // 実際の値は stringValue メソッドを使用して取得できる
  *  String s = js.stringValue();</code></pre>
@@ -29,4 +29,3 @@
  *      // ["テスト\t改行も\n"]</code></pre>
  */
 package info.vividcode.util.json;
-
