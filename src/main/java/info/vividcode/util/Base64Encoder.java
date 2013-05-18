@@ -7,16 +7,17 @@ import java.util.NoSuchElementException;
 
 /**
  * Base64 エンコードを行う処理を提供するクラス.
- * @author nobuoka
  *
+ * RFC 4648 : http://www.ietf.org/rfc/rfc4648.txt
+ * @author nobuoka
  */
 public class Base64Encoder {
 
-    static final private byte[] CONVERT_TABLE =
+    private static final byte[] CONVERT_TABLE =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
         .getBytes( Charset.forName("US-ASCII") );
 
-    static private class Bits6Iterator {
+    private static final class Bits6Iterator {
         private byte[] bytes;
         private int bytePos;
         private int bitPos;
@@ -34,17 +35,17 @@ public class Base64Encoder {
                 throw new NoSuchElementException();
             }
             if (bitPos + 6 <= 8) {
-                b = ( bytes[bytePos] >> ( 2 - bitPos ) ) & 0x3F;
+                b = ( bytes[bytePos] >> (2 - bitPos) ) & 0x3F;
                 if ((bitPos += 6) == 8) {
                     bytePos++;
                     bitPos = 0;
                 }
             } else {
-                b += ( bytes[bytePos] << ( bitPos - 2 ) ) & 0x3F;
+                b += (bytes[bytePos] << (bitPos - 2)) & 0x3F;
                 bytePos++;
                 bitPos -= 2;
                 if (hasNext()) {
-                    b += ( (int)( bytes[bytePos] ) & 0xFF ) >> ( 8 - bitPos );
+                    b += ( (int)(bytes[bytePos]) & 0xFF ) >> (8 - bitPos);
                 }
             }
             return (byte)b;
@@ -54,20 +55,25 @@ public class Base64Encoder {
     // cant instantiate from this class
     private Base64Encoder() {}
 
+    private static final String MSG_NULL_ARG =
+            "`null` can't be base64-encoded. Please pass byte array.";
+
     /**
      * バイト列を Base64 エンコードする.
+     * If you call this method with `null`, this throw `IllegalArgumentException` error.
      * @param bytes Base64 エンコードを行う対象のバイト列
      * @return bytes を Base64 エンコードした結果の文字列
      */
     static public String encode(byte[] bytes) {
-        ByteArrayOutputStream os = null;
-        byte[] res = null;
+        if (bytes == null) throw new IllegalArgumentException(MSG_NULL_ARG);
+
+        byte[] res;
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
-            os = new ByteArrayOutputStream();
             int count = 0;
             Bits6Iterator b6r = new Bits6Iterator(bytes);
             while (b6r.hasNext()) {
-                os.write( CONVERT_TABLE[ b6r.next() ] );
+                os.write( CONVERT_TABLE[b6r.next()] );
                 count++;
             }
             for (int i = ( 4 - (count % 4) ) % 4; 0 < i; i--) {
