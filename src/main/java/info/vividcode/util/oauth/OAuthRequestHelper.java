@@ -4,10 +4,12 @@ import info.vividcode.util.Base64Encoder;
 
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -28,7 +30,7 @@ import javax.crypto.spec.SecretKeySpec;
  *  // 今回は request token を求める例で token secret はないので空文字列
  *  String tokenSecret = "";
  *  // secrets 文字列 (Consumer secret と token secret を繋いだもの)
- *  String secrets = consumerSecret + "&" + tokenSecret;
+ *  String secrets = OAuthEncoder.encode(consumerSecret) + "&" + OAuthEncoder.encode(tokenSecret)
  *  // OAuth 関係のパラメータ
  *  OAuthRequestHelper.ParamList paramList = new OAuthRequestHelper.ParamList(
  *        new String[][]{
@@ -64,15 +66,17 @@ public class OAuthRequestHelper {
      * @author nobuoka
      *
      */
-    static public class Param {
-        private String mKey;
-        private String mValue;
+    public static class Param {
+        private final String mKey;
+        private final String mValue;
         public Param(String key, String value) {
+            if (key == null)
+                throw new IllegalArgumentException("`key` must not be null.");
             mKey = key;
-            mValue = value;
+            mValue = value; // TODO `mValue` may be `null`?
         }
-        public String getKey() { return mKey; }
-        public String getValue() { return mValue; }
+        public final String getKey() { return mKey; }
+        public final String getValue() { return mValue; }
     }
 
     /**
@@ -83,7 +87,7 @@ public class OAuthRequestHelper {
      * @author nobuoka
      *
      */
-    static public class ParamComparator implements Comparator<Param> {
+    public static class ParamComparator implements Comparator<Param> {
         private ParamComparator() {}
         @Override
         public int compare(Param o1, Param o2) {
@@ -112,7 +116,7 @@ public class OAuthRequestHelper {
      * @author nobuoka
      *
      */
-    static public class ParamList extends ArrayList<Param> {
+    public static class ParamList extends ArrayList<Param> {
         private static final long serialVersionUID = -849036503227560868L;
         public ParamList() {
             super();
@@ -121,20 +125,27 @@ public class OAuthRequestHelper {
             super(paramStrs.length);
             addAll(paramStrs);
         }
-        public void addAll( String[][] paramStrs ) {
+        private static final String MSG_ADD_ALL_ARG_ELEM_2_LEN =
+                "`paramStrs`, argument of `addAll` method must be an array " +
+                "which element is 2-length Array.";
+        public void addAll(String[][] paramStrs) {
+            List<Param> list = new ArrayList<Param>(paramStrs.length);
             for (String[] ps : paramStrs) {
                 if (ps.length != 2) {
                     // TODO : 例外処理
-                    throw new RuntimeException("配列の形式が不正です");
+                    throw new IllegalArgumentException(MSG_ADD_ALL_ARG_ELEM_2_LEN);
                 }
-                add( new Param(ps[0], ps[1]) );
+                list.add( new Param(ps[0], ps[1]) );
             }
+            this.addAll(list);
         }
     }
 
     private static final byte[] NONCE_SEED_BYTES =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        .getBytes( Charset.forName("US-ASCII") );
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+            .getBytes( Charset.forName("US-ASCII") );
+    private static final String MSG_NONCE_LEN_MUST_POS =
+            "Length of nonce string must be positive integer.";
 
     /**
      *OAuth 認証に用いる nonce 文字列を生成する.
@@ -150,6 +161,8 @@ public class OAuthRequestHelper {
      *@return 生成した nonce 文字列
      */
     public static String getNonceString(int length) {
+        if (!(length > 0)) throw new IllegalArgumentException(MSG_NONCE_LEN_MUST_POS);
+
         SecureRandom rand = new SecureRandom();
         byte[] bytes = new byte[length];
         for (int i = 0; i < length; i++) {
@@ -215,16 +228,17 @@ public class OAuthRequestHelper {
 
     // TODO : 例外処理
     private void sign() throws GeneralSecurityException {
-        String signatureBaseStr =
+        final String signatureBaseStr =
             OAuthEncoder.encode( mMethodStr ) + '&' +
             OAuthEncoder.encode( mUrlStr ) + '&' +
             OAuthEncoder.encode( createParameterNormalizationString() );
+
         // TODO : 別のアルゴリズムへの対応
-        String algorithmName = "HmacSHA1";
-        SecretKeySpec sks = new SecretKeySpec(
-                mSecretsStr.getBytes( Charset.forName("US-ASCII") ), algorithmName );
+        final String algorithmName = "HmacSHA1";
+        Key key = new SecretKeySpec(
+                mSecretsStr.getBytes(Charset.forName("US-ASCII")), algorithmName );
         Mac mac = Mac.getInstance(algorithmName);
-        mac.init(sks);
+        mac.init(key);
         byte[] digest = mac.doFinal( signatureBaseStr.getBytes( Charset.forName("US-ASCII") ) );
         String signatureStr = Base64Encoder.encode(digest);
         mOauthParams.add( new Param("oauth_signature", signatureStr) );
