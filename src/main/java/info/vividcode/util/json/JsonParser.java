@@ -195,8 +195,19 @@ public class JsonParser {
                         case 0x75:
                             StringBuilder sb2 = new StringBuilder();
                             // TODO : error 処理
-                            for (int i = 0; i < 4; i++) sb2.appendCodePoint(cpi.next());
-                            sb.append( (char)Integer.parseInt(sb2.toString(), 16) );
+                            for (int i = 0; i < 4; i++) {
+                                int numCP = cpi.next();
+                                if (0x30 <= numCP && numCP <= 0x39) { /* 0 - 9 */
+                                    sb2.appendCodePoint(numCP);
+                                } else {
+                                    String followedChar = new String(Character.toChars(numCP));
+                                    throw new InvalidJsonException( // TODO It should be TokenException?
+                                            "Charactor ‘" + followedChar + "’ following “\\u" + sb2.toString() + "” is invalid. " +
+                                            "It must be a numeric charactor.");
+                                }
+                            }
+                            int escapedCharCodePoint = Integer.parseInt(sb2.toString(), 16);
+                            sb.append( (char) escapedCharCodePoint );
                             break;
                         default:
                             throw new RuntimeException(); // TODO

@@ -66,4 +66,26 @@ public class JsonParserTest {
         }
     }
 
+    @Test
+    public void testNormalStringParsing() {
+        String jsonString = "[ \"abcd0123あいうえお\" ]";
+        JsonValue v = JsonParser.parse(jsonString).arrayValue().get(0);
+        assertEquals( JsonValue.ValueType.STRING_VALUE, v.valueType() );
+        assertEquals( "abcd0123あいうえお", v.stringValue() );
+    }
+
+    @Test
+    public void testEscapedStringParsing() {
+        String jsonString = "[ \"\\u0020\" ]";
+        JsonValue v = JsonParser.parse(jsonString).arrayValue().get(0);
+        assertEquals( JsonValue.ValueType.STRING_VALUE, v.valueType() );
+        assertEquals( " ", v.stringValue() );
+    }
+
+    @Test( expected = InvalidJsonException.class )
+    public void testInvalidEscapedStringParsing() {
+        String jsonString = "[ \"\\u20\" ]";
+        JsonParser.parse(jsonString);
+    }
+
 }
