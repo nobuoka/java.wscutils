@@ -35,7 +35,7 @@ public class JsonParserTest {
     @Test
     public void testEmptyArrayParsing() {
         String jsonString = "[]";
-        JsonArray jarray = JsonParser.parse(jsonString).arrayValue();
+        JsonArray jarray = JsonParser.parse(jsonString).asArray();
         assertEquals( 0, jarray.size() );
     }
 
@@ -45,7 +45,7 @@ public class JsonParserTest {
     @Test
     public void testEmptyObjectParsing() {
         String jsonString = "{}";
-        JsonObject jobject = JsonParser.parse(jsonString).objectValue();
+        JsonObject jobject = JsonParser.parse(jsonString).asObject();
         assertEquals( 0, jobject.size() );
     }
 
@@ -60,7 +60,7 @@ public class JsonParserTest {
         };
         for( String s : targetNumStrs ) {
             jsonString = "[ " + s + " ]";
-            JsonValue v = JsonParser.parse(jsonString).arrayValue().get(0);
+            JsonValue v = JsonParser.parse(jsonString).get(0);
             assertEquals( JsonValue.ValueType.NUMBER_VALUE, v.valueType() );
             assertEquals( new BigDecimal(s), v.numberValue() );
         }
@@ -69,7 +69,7 @@ public class JsonParserTest {
     @Test
     public void testNormalStringParsing() {
         String jsonString = "[ \"abcd0123あいうえお\" ]";
-        JsonValue v = JsonParser.parse(jsonString).arrayValue().get(0);
+        JsonValue v = JsonParser.parse(jsonString).get(0);
         assertEquals( JsonValue.ValueType.STRING_VALUE, v.valueType() );
         assertEquals( "abcd0123あいうえお", v.stringValue() );
     }
@@ -77,7 +77,7 @@ public class JsonParserTest {
     @Test
     public void testEscapedStringParsing() {
         String jsonString = "[ \"\\u0020\" ]";
-        JsonValue v = JsonParser.parse(jsonString).arrayValue().get(0);
+        JsonValue v = JsonParser.parse(jsonString).get(0);
         assertEquals( JsonValue.ValueType.STRING_VALUE, v.valueType() );
         assertEquals( " ", v.stringValue() );
     }

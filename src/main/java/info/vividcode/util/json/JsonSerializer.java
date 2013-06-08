@@ -151,10 +151,10 @@ public class JsonSerializer {
         //} else {
             switch (jvalue.valueType()) {
                 case OBJECT_VALUE:
-                    serializeJObject(sb, jvalue.objectValue(), ancestorIdSet);
+                    serializeJObject(sb, jvalue.asObject(), ancestorIdSet);
                     break;
                 case ARRAY_VALUE:
-                    serializeJArray(sb, jvalue.arrayValue(), ancestorIdSet);
+                    serializeJArray(sb, jvalue.asArray(), ancestorIdSet);
                     break;
                 case STRING_VALUE:
                     serializeJString(sb, jvalue.stringValue());

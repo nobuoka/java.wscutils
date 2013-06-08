@@ -11,12 +11,9 @@ import java.math.BigDecimal;
  * @author nobuoka
  *
  */
-public class JsonNumber implements JsonValue {
+public class JsonNumber extends AbstractJsonLeafValue {
 
-    private static final String CLASS_NAME  = "JsonNumber";
-    private static final String METHOD_NAME = "numberValue()";
-
-    private BigDecimal val;
+    private final BigDecimal val;
 
     /**
      * 指定の BigDecimal オブジェクトに対応する JsonNumber オブジェクトを生成する.
@@ -32,7 +29,7 @@ public class JsonNumber implements JsonValue {
      * @param val JsonNumber に対応する数値
      */
     public JsonNumber(double val) {
-        this.val = new BigDecimal(val);
+        this(new BigDecimal(val));
     }
 
     /**
@@ -45,51 +42,11 @@ public class JsonNumber implements JsonValue {
     }
 
     /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonArray arrayValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonObject objectValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
      * 対応する BigDecimal オブジェクトを返す.
      */
     @Override
     public BigDecimal numberValue() {
         return val;
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public String stringValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public Boolean booleanValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
     }
 
     /**

@@ -1,7 +1,5 @@
 package info.vividcode.util.json;
 
-import java.math.BigDecimal;
-
 /**
  * JSON の string を表すためのクラス.
  *
@@ -11,12 +9,9 @@ import java.math.BigDecimal;
  * @author nobuoka
  *
  */
-public class JsonString implements JsonValue {
+public class JsonString extends AbstractJsonLeafValue {
 
-    private static final String CLASS_NAME  = "JsonString";
-    private static final String METHOD_NAME = "stringValue()";
-
-    private String val;
+    private final String val;
 
     /**
      * 指定の String オブジェクトに対応する JsonString オブジェクトを生成する.
@@ -37,51 +32,11 @@ public class JsonString implements JsonValue {
     }
 
     /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonArray arrayValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "If you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonObject objectValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "If you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public BigDecimal numberValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "If you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
      * 対応する String オブジェクトが返される.
      */
     @Override
     public String stringValue() {
         return val;
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public Boolean booleanValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "If you want to get the value, please use the " + METHOD_NAME + " method instead." );
     }
 
     /**

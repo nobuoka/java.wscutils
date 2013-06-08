@@ -13,8 +13,6 @@ import java.util.HashMap;
 public class JsonObject extends HashMap<String,JsonValue> implements JsonValue {
 
     private static final long serialVersionUID = -898362213984847287L;
-    private static final String CLASS_NAME  = "JsonObject";
-    private static final String METHOD_NAME = "objectValue()";
     final Object ID;
 
     /**
@@ -35,52 +33,48 @@ public class JsonObject extends HashMap<String,JsonValue> implements JsonValue {
     }
 
     /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonArray arrayValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
      * 自分自身を返す.
      * このオブジェクトが JsonValue 型として扱われている場合に, キャストの代わりとして使用することができる.
      */
     @Override
-    public JsonObject objectValue() {
+    public JsonObject asObject() {
         return this;
     }
 
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
+    @Override
+    public JsonValue get(String key) {
+        return super.get(key);
+    }
+
+
+    private String createErrorMessageOfMethodNotSupporting(String methodName) {
+        return "JSON value of " + this.valueType().name() +
+                " doesn't support “" + methodName + "” method.";
+    }
+
+    @Override
+    public JsonArray asArray() throws JsonTypeException {
+        throw new JsonTypeException(createErrorMessageOfMethodNotSupporting("asArray()"));
+    }
+
     @Override
     public BigDecimal numberValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
+        throw new JsonTypeException(createErrorMessageOfMethodNotSupporting("numberValue()"));
     }
 
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
     @Override
     public String stringValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
+        throw new JsonTypeException(createErrorMessageOfMethodNotSupporting("stringValue()"));
     }
 
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
     @Override
     public Boolean booleanValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
+        throw new JsonTypeException(createErrorMessageOfMethodNotSupporting("booleanValue()"));
+    }
+
+    @Override
+    public JsonValue get(int index) {
+        throw new JsonTypeException(createErrorMessageOfMethodNotSupporting("get(int)"));
     }
 
 }

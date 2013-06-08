@@ -24,44 +24,48 @@ public interface JsonValue {
         NULL_VALUE
     }
 
+    JsonValue get(int index) throws JsonTypeException;
+    JsonValue get(String key) throws JsonTypeException;
+
     /**
      * このオブジェクトが表す JSON の値のタイプを返す.
      */
-    public ValueType valueType();
+    ValueType valueType();
 
     /**
      * JSON の array を表すオブジェクトの場合に,
      * 対応する Java のオブジェクト ({@link JsonArray} オブジェクト) を返す.
      * @return 対応する JsonArray オブジェクト
      */
-    public JsonArray arrayValue();
+    JsonArray asArray() throws JsonTypeException;
 
     /**
      * JSON の object を表すオブジェクトの場合に,
      * 対応する Java のオブジェクト ({@link JsonObject} オブジェクト) を返す.
      * @return 対応する JsonObject オブジェクト
      */
-    public JsonObject objectValue();
+    JsonObject asObject() throws JsonTypeException;
 
     /**
      * JSON の number を表すオブジェクトの場合に,
      * 対応する Java のオブジェクト ({@link BigDecimal} オブジェクト) を返す.
      * @return 対応する BigDecimal オブジェクト
      */
-    public BigDecimal numberValue();
+    BigDecimal numberValue() throws JsonTypeException;
 
     /**
      * JSON の object を表すオブジェクトの場合に,
      * 対応する Java のオブジェクト ({@link String} オブジェクト) を返す
      * @return 対応する String オブジェクト
      */
-    public String  stringValue();
+
+    String stringValue() throws JsonTypeException;
 
     /**
      * JSON の object を表すオブジェクトの場合に,
      * 対応する Java のオブジェクト ({@link Boolean} オブジェクト) を返す.
      * @return 対応する Boolean オブジェクト
      */
-    public Boolean booleanValue();
+    Boolean booleanValue() throws JsonTypeException;
 
 }

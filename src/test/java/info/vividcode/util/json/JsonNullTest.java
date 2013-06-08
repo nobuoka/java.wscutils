@@ -26,29 +26,29 @@ public class JsonNullTest {
                 mJsonNull.valueType() );
     }
 
-    @Test
+    @Test( expected = JsonTypeException.class )
     public void testArrayValue() {
-        assertTrue( mJsonNull.arrayValue() == null );
+        mJsonNull.asArray();
     }
 
-    @Test
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodObjectValue() {
-        assertTrue( mJsonNull.objectValue() == null );
+        mJsonNull.asObject();
     }
 
-    @Test
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodBooleanValue() {
-        assertTrue( mJsonNull.booleanValue() == null );
+        mJsonNull.booleanValue();
     }
 
-    @Test
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodNumberValue() {
-        assertTrue( mJsonNull.numberValue() == null );
+        mJsonNull.numberValue();
     }
 
-    @Test
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodStringValue() {
-        assertTrue( mJsonNull.stringValue() == null );
+        mJsonNull.stringValue();
     }
 
 }

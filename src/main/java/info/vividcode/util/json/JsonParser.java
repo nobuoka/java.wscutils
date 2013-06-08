@@ -194,7 +194,6 @@ public class JsonParser {
                             sb.appendCodePoint(0x09); break;
                         case 0x75:
                             StringBuilder sb2 = new StringBuilder();
-                            // TODO : error 処理
                             for (int i = 0; i < 4; i++) {
                                 int numCP = cpi.next();
                                 if (0x30 <= numCP && numCP <= 0x39) { /* 0 - 9 */

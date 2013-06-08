@@ -1,7 +1,5 @@
 package info.vividcode.util.json;
 
-import java.math.BigDecimal;
-
 /**
  * JSON の null を表すためのクラス.
  *
@@ -13,7 +11,7 @@ import java.math.BigDecimal;
  * @author nobuoka
  *
  */
-public class JsonNull implements JsonValue {
+public class JsonNull extends AbstractJsonLeafValue {
 
     /** {@link JsonNull} の唯一のインスタンス */
     public static final JsonNull VALUE = new JsonNull();
@@ -28,51 +26,6 @@ public class JsonNull implements JsonValue {
     @Override
     public ValueType valueType() {
         return ValueType.NULL_VALUE;
-    }
-
-    /**
-     * 常に null を返す.
-     * @return null
-     */
-    @Override
-    public JsonArray arrayValue() {
-        return null;
-    }
-
-    /**
-     * 常に null を返す.
-     * @return null
-     */
-    @Override
-    public JsonObject objectValue() {
-        return null;
-    }
-
-    /**
-     * 常に null を返す.
-     * @return null
-     */
-    @Override
-    public BigDecimal numberValue() {
-        return null;
-    }
-
-    /**
-     * 常に null を返す.
-     * @return null
-     */
-    @Override
-    public String stringValue() {
-        return null;
-    }
-
-    /**
-     * 常に null を返す.
-     * @return null
-     */
-    @Override
-    public Boolean booleanValue() {
-        return null;
     }
 
     /**

@@ -29,25 +29,25 @@ public class JsonArrayTest {
 
     @Test
     public void testArrayValue() {
-        assertEquals( mJsonArray, mJsonArray.arrayValue() );
+        assertEquals( mJsonArray, mJsonArray.asArray() );
     }
 
-    @Test( expected = UnsupportedOperationException.class )
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodObjectValue() {
-        mJsonArray.objectValue();
+        mJsonArray.asObject();
     }
 
-    @Test( expected = UnsupportedOperationException.class )
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodBooleanValue() {
         mJsonArray.booleanValue();
     }
 
-    @Test( expected = UnsupportedOperationException.class )
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodNumberValue() {
         mJsonArray.numberValue();
     }
 
-    @Test( expected = UnsupportedOperationException.class )
+    @Test( expected = JsonTypeException.class )
     public void testUnusableMethodStringValue() {
         mJsonArray.stringValue();
     }

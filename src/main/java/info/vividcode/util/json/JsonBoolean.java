@@ -1,7 +1,5 @@
 package info.vividcode.util.json;
 
-import java.math.BigDecimal;
-
 /**
  * JSON の boolean (true, false) を表すためのクラス.
  *
@@ -13,21 +11,18 @@ import java.math.BigDecimal;
  * @author nobuoka
  *
  */
-public class JsonBoolean implements JsonValue {
+public class JsonBoolean extends AbstractJsonLeafValue {
 
-    private static final String CLASS_NAME  = "JsonBoolean";
-    private static final String METHOD_NAME = "booleanValue()";
-
-    private Boolean val;
+    private final Boolean val;
 
     private JsonBoolean(Boolean b) {
         val = b;
     }
 
     /** JSON の true に対応する JsonBoolean オブジェクト */
-    static final public JsonBoolean TRUE  = new JsonBoolean(true);
+    public static final JsonBoolean TRUE  = new JsonBoolean(true);
     /** JSON の false に対応する JsonBoolean オブジェクト */
-    static final public JsonBoolean FALSE = new JsonBoolean(false);
+    public static final JsonBoolean FALSE = new JsonBoolean(false);
 
     /**
      * 対応する JSON の値のタイプを返す.
@@ -36,46 +31,6 @@ public class JsonBoolean implements JsonValue {
     @Override
     public ValueType valueType() {
         return ValueType.BOOLEAN_VALUE;
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonArray arrayValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public JsonObject objectValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public BigDecimal numberValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
-    }
-
-    /**
-     * 常に, 例外 {@link UnsupportedOperationException} が投げられる.
-     */
-    @Override
-    public String stringValue() {
-        throw new UnsupportedOperationException(
-                "This object is a " + CLASS_NAME + " object. " +
-                "if you want to get the value, please use the " + METHOD_NAME + " method instead." );
     }
 
     /**
