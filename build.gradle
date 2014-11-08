@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'info.vividcode.utils'
-version = '0.1.0'
+version = '0.1.1-SNAPSHOT'
 
 description = "WSCUtils includes utilities for web service client."
 
