@@ -30,7 +30,7 @@ import javax.crypto.spec.SecretKeySpec;
  *  // 今回は request token を求める例で token secret はないので空文字列
  *  String tokenSecret = "";
  *  // secrets 文字列 (Consumer secret と token secret を繋いだもの)
- *  String secrets = OAuthEncoder.encode(consumerSecret) + "&" + OAuthEncoder.encode(tokenSecret)
+ *  String secrets = OAuthEncoder.encode(consumerSecret) + "&amp;" + OAuthEncoder.encode(tokenSecret)
  *  // OAuth 関係のパラメータ
  *  OAuthRequestHelper.ParamList paramList = new OAuthRequestHelper.ParamList(
  *        new String[][]{
@@ -109,7 +109,7 @@ public class OAuthRequestHelper {
 
     /**
      * パラメータ (Param オブジェクト) のリストを表すクラス.
-     * 実装としては ArrayList<Param> であり,
+     * 実装としては {@code ArrayList<Param>} であり,
      * パラメータの追加を行いやすいように 2 次元の
      * String 型配列を受け取るコンストラクタと addAll メソッドが追加されている.
      *
@@ -184,7 +184,7 @@ public class OAuthRequestHelper {
      *
      *@param urlStr リクエスト先の URL. クエリーパラメータは含めない
      *@param method リクエストメソッド. "PUT" や "GET" など
-     *@param secretsStr Consumer secret と token secret を "&" 記号で繋いだ文字列. token secret がない場合は空文字列を使う
+     *@param secretsStr Consumer secret と token secret を "&amp;" 記号で繋いだ文字列. token secret がない場合は空文字列を使う
      *@param oauthParams OAuth 認証のためのパラメータのリスト
      *@param urlQueryParams クエリーパラメータのリスト
      *@param reqBodyParams リクエストボディに含めるパラメータのリスト
