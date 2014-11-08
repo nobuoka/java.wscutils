@@ -5,18 +5,19 @@ This is Java library which is include utilities for web service client.
 
 ## Build
 
-We use [Apache Maven](http://maven.apache.org/).
+We use [Gradle](http://www.gradle.org/).
+As this project contains Gradle wrapper, you need not install Gradle.
 
-To create jar package, run next command:
-
-```
-mvn package
-```
-
-Then `wscutils-X.X.X.jar` is created in `target` directory.
-
-To run tests, run next command:
+To create jar package, execute next command:
 
 ```
-mvn test
+./gradlew jar
+```
+
+Then `wscutils-X.X.X.jar` is created in `build/libs` directory.
+
+To run tests, execute next command:
+
+```
+./gradlew test
 ```
