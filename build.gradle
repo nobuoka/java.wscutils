@@ -1,4 +1,15 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 group = 'info.vividcode.utils'
 version = '0.1.1-SNAPSHOT'
@@ -12,9 +23,79 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+def javaApiUrl = 'http://docs.oracle.com/javase/8/docs/api/'
+tasks.withType(Javadoc) {
+    options.links(javaApiUrl)
+}
+
 repositories {
     mavenCentral()
 }
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version:'4.11'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+def pomConfig = {
+    description 'WSCUtils includes utilities for web service client.'
+    url 'https://github.com/nobuoka/java.wscutils'
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "nobuoka"
+            name "NOBUOKA Yu"
+            email "nobuoka+dev@vividcode.info"
+        }
+    }
+    scm {
+        connection "scm:git:https://github.com/nobuoka/java.wscutils.git"
+        developerConnection "scm:git:ssh://git@github.com/nobuoka/java.wscutils.git"
+        url "https://github.com/nobuoka/java.wscutils"
+    }
+    issueManagement {
+        url "https://github.com/nobuoka/java.wscutils/issues"
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom.withXml {
+                def root = asNode()
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    if (!project.hasProperty('bintrayUser')) throw new RuntimeException('Project property `bintrayUser` must be set')
+    if (!project.hasProperty('bintrayKey')) throw new RuntimeException('Project property `bintrayKey` must be set')
+    user = bintrayUser
+    key = bintrayKey
+
+    publications = ['mavenJava']
+    pkg {
+        repo = 'maven'
+        name = 'java.wscutils'
+    }
 }
