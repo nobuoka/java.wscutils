@@ -91,10 +91,16 @@ publishing {
 }
 
 bintray {
-    if (!project.hasProperty('bintrayUser')) throw new RuntimeException('Project property `bintrayUser` must be set')
-    if (!project.hasProperty('bintrayKey')) throw new RuntimeException('Project property `bintrayKey` must be set')
-    user = bintrayUser
-    key = bintrayKey
+    if (project.hasProperty('bintrayUser')) {
+        user = project.bintrayUser
+    } else {
+        logger.warn("Project property `bintrayUser` must be set if you upload archives to Bintray")
+    }
+    if (project.hasProperty('bintrayKey')) {
+        key = project.bintrayKey
+    } else {
+        logger.warn("Project property `bintrayKey` must be set if you upload archives to Bintray")
+    }
 
     publications = ['mavenJava']
     pkg {
