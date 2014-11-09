@@ -17,7 +17,7 @@ public class OAuthEncoder {
     private static final byte[] BS = { 48,49,50,51,52,53,54,55,56,57,65,66,67,68,69,70 };
     /** Elements of this array represent whether the byte specified as index need to be encoded.
      * (Range of target bytes are just from 0x00 to 0x7F. All other bytes are need to be encoded.) */
-    private static final boolean[] NEED_ENCODE = new boolean[0x7F];
+    private static final boolean[] NEED_ENCODE = new boolean[0x80];
     static {
         for (int i = 0; i < NEED_ENCODE.length; i++) {
             // A(65)-Z(90), a(97)-z(122), 0(48)-9(57), -(45), .(46), _(95), ~(126)

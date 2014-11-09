@@ -39,9 +39,9 @@ public class OAuthEncoderTest {
         //   characters MUST be uppercase.
         // See: https://tools.ietf.org/html/rfc5849#section-3.6
 
-        String str = "(あ) good!";
+        String str = "(あ) good!\u007F\u0080";
         assertEquals("All other characters are encoded.",
-                "%28%E3%81%82%29%20good%21", OAuthEncoder.encode(str));
+                "%28%E3%81%82%29%20good%21%7F%C2%80", OAuthEncoder.encode(str));
     }
 
 }
