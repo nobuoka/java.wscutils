@@ -25,6 +25,7 @@ tasks.withType(JavaCompile) {
 
 def javaApiUrl = 'http://docs.oracle.com/javase/8/docs/api/'
 tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
     options.links(javaApiUrl)
 }
 
