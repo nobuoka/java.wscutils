@@ -1,6 +1,8 @@
 WSCUtils
 ==============================
 
+[![Build Status](https://travis-ci.org/nobuoka/java.wscutils.svg)](https://travis-ci.org/nobuoka/java.wscutils)
+
 This is Java library which is include utilities for web service client.
 
 ## Build
