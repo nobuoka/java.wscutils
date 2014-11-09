@@ -1,7 +1,7 @@
 package info.vividcode.util.oauth;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 /**
  * An encoder for encoding character data using percent-encoding method
@@ -44,7 +44,7 @@ public class OAuthEncoder {
      */
     public static String encode(String str) {
         ByteArrayOutputStream os = new ByteArrayOutputStream(str.length());
-        for (byte b : str.getBytes(StandardCharsets.UTF_8)) {
+        for (byte b : str.getBytes(Charset.forName("UTF_8"))) {
             if (b < 0 || NEED_ENCODE[b]) {
                 os.write(37); // "%"
                 os.write(BS[(b >> 4) & 0x0F]); // Upper four bits
@@ -53,7 +53,7 @@ public class OAuthEncoder {
                 os.write(b);
             }
         }
-        return new String(os.toByteArray(), StandardCharsets.US_ASCII);
+        return new String(os.toByteArray(), Charset.forName("US-ASCII"));
         // ByteArrayOutputStream#close() method has no effect, so it need not be called.
     }
 
