@@ -76,6 +76,8 @@ def pomConfig = {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId 'wscutils'
+
             from components.java
             artifact sourcesJar
             artifact javadocJar
