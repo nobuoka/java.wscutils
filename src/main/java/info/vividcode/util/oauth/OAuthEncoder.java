@@ -44,7 +44,7 @@ public class OAuthEncoder {
      */
     public static String encode(String str) {
         ByteArrayOutputStream os = new ByteArrayOutputStream(str.length());
-        for (byte b : str.getBytes(Charset.forName("UTF_8"))) {
+        for (byte b : str.getBytes(Charset.forName("UTF-8"))) {
             if (b < 0 || NEED_ENCODE[b]) {
                 os.write(37); // "%"
                 os.write(BS[(b >> 4) & 0x0F]); // Upper four bits
