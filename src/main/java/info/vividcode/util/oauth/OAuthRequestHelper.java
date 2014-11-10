@@ -177,6 +177,7 @@ public class OAuthRequestHelper {
     private ParamList mOauthParams;
     private ParamList mUrlQueryParams;
     private ParamList mReqBodyParams;
+    private String mSignature;
 
     /**
      *OAuth 認証を用いた HTTP リクエストに必要な情報を保持した
@@ -215,15 +216,25 @@ public class OAuthRequestHelper {
         return sb.toString();
     }
 
-    private String createParameterNormalizationString() {
+    private static void addEncodedKeyValuePairsToParamList(ParamList src, ParamList dist) {
+        for (Param p : src) {
+            dist.add(new Param(OAuthEncoder.encode(p.getKey()), OAuthEncoder.encode(p.getValue())));
+        }
+    }
+
+    String createParameterNormalizationString() {
         ParamList paramList = new ParamList();
-        if (mOauthParams    != null) paramList.addAll(mOauthParams);
-        if (mUrlQueryParams != null) paramList.addAll(mUrlQueryParams);
-        if (mReqBodyParams  != null) paramList.addAll(mReqBodyParams);
-        Param[] params = paramList.toArray( new Param[paramList.size()] );
-        Arrays.sort(params, ParamComparator.getInstance());
-        String ns = toNormalizationString(params);
-        return ns;
+        if (mOauthParams    != null) addEncodedKeyValuePairsToParamList(mOauthParams, paramList);
+        if (mUrlQueryParams != null) addEncodedKeyValuePairsToParamList(mUrlQueryParams, paramList);
+        if (mReqBodyParams  != null) addEncodedKeyValuePairsToParamList(mReqBodyParams, paramList);
+        paramList.sort(ParamComparator.getInstance());
+
+        StringBuilder sb = new StringBuilder();
+        for (Param param : paramList) {
+            if (sb.length() != 0) sb.append('&');
+            sb.append(param.getKey()).append('=').append(param.getValue());
+        }
+        return sb.toString();
     }
 
     // TODO : 例外処理
@@ -239,9 +250,8 @@ public class OAuthRequestHelper {
                 mSecretsStr.getBytes(Charset.forName("US-ASCII")), algorithmName );
         Mac mac = Mac.getInstance(algorithmName);
         mac.init(key);
-        byte[] digest = mac.doFinal( signatureBaseStr.getBytes( Charset.forName("US-ASCII") ) );
-        String signatureStr = Base64Encoder.encode(digest);
-        mOauthParams.add( new Param("oauth_signature", signatureStr) );
+        byte[] digest = mac.doFinal(signatureBaseStr.getBytes(Charset.forName("US-ASCII")));
+        mSignature = Base64Encoder.encode(digest);
     }
 
     /**
@@ -261,7 +271,10 @@ public class OAuthRequestHelper {
      */
     public String getUrlStringIncludeQueryParams(boolean includeOAuthParams) {
         ParamList paramList = new ParamList();
-        if (includeOAuthParams && mOauthParams != null) paramList.addAll(mOauthParams);
+        if (includeOAuthParams) {
+            if (mOauthParams != null) paramList.addAll(mOauthParams);
+            paramList.add(new Param("oauth_signature", mSignature));
+        }
         if (mUrlQueryParams != null) paramList.addAll(mUrlQueryParams);
         if (paramList.size() == 0) return mUrlStr;
         Param[] params = paramList.toArray( new Param[paramList.size()] );
@@ -285,7 +298,10 @@ public class OAuthRequestHelper {
      */
     public String getRequestBodyString(boolean includeOAuthParams) {
         ParamList paramList = new ParamList();
-        if (includeOAuthParams && mOauthParams != null) paramList.addAll(mOauthParams);
+        if (includeOAuthParams) {
+            if (mOauthParams != null) paramList.addAll(mOauthParams);
+            paramList.add(new Param("oauth_signature", mSignature));
+        }
         if (mReqBodyParams != null) paramList.addAll(mReqBodyParams);
         if (paramList.size() == 0) return "";
         Param[] params = paramList.toArray( new Param[paramList.size()] );
@@ -308,6 +324,9 @@ public class OAuthRequestHelper {
             sb.append( OAuthEncoder.encode(p.getKey()) + "=\"" );
             sb.append( OAuthEncoder.encode(p.getValue()) + "\"" );
         }
+        sb.append(", ");
+        sb.append("oauth_signature");
+        sb.append("=\"").append(OAuthEncoder.encode(mSignature)).append('"');
         return sb.toString();
     }
 
