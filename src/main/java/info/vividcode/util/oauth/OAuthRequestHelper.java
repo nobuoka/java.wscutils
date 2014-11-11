@@ -7,7 +7,6 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -15,56 +14,59 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- *OAuth 認証を用いた HTTP リクエストを手助けするためのクラス.
- *<p>
- *使用例は以下である.
- *<pre><code>  // Twitter に Request token を求める際の例
+ * Helper for the client of OAuth 1.0 Protocol.
+ * <p>
+ * Following code is the example of the way to use this class.
+ * <pre><code>  // Example: Way to retrieve the temporary credentials from Twitter
  *
- *  // 送信先 URL
+ *  // URL.
  *  String url = "https://api.twitter.com/oauth/request_token";
- *  // リクエストメソッド
+ *  // Request method.
  *  String method = "POST";
- *  // Consumer key と secret
- *  String consumerKey    = "XXXXXXXXXX";
- *  String consumerSecret = "XXXXXXXXXX";
- *  // 今回は request token を求める例で token secret はないので空文字列
- *  String tokenSecret = "";
- *  // secrets 文字列 (Consumer secret と token secret を繋いだもの)
- *  String secrets = OAuthEncoder.encode(consumerSecret) + "&amp;" + OAuthEncoder.encode(tokenSecret)
- *  // OAuth 関係のパラメータ
- *  OAuthRequestHelper.ParamList paramList = new OAuthRequestHelper.ParamList(
+ *  // Client identifier (a.k.a. consumer key) and client shared-secret (a.k.a. consumer secret).
+ *  String clientIdentifier = "YOUR_CONSUMER_KEY";
+ *  String clientSharedSecret = "YOUR_CONSUMER_SECRET";
+ *
+ *  // Key: the concatenated values of the encoded client shared-secret, an "&amp;" character,
+ *  //     and the encoded token shared-secret, which is empty string in this case.
+ *  String key = OAuthEncoder.encode(clientSharedSecret) + '&amp;';
+ *  // OAuth parameters.
+ *  OAuthRequestHelper.ParamList paramList = OAuthRequestHelper.ParamList.fromArray(
  *        new String[][]{
- *          { "oauth_consumer_key", consumerKey },
- *          { "oauth_nonce", OAuthRequestHelper.getNonceString() },
- *          { "oauth_signature_method", "HMAC-SHA1" },
- *          { "oauth_timestamp", Long.toString( new Date().getTime() / 1000 ) },
+ *          { "oauth_consumer_key", clientIdentifier },
+ *          { "oauth_nonce", OAuthRequestHelper.generateNonce() },
+ *          { "oauth_signature_method", "HMAC-SHA1" }, // Currently only supports HTAC-SHA1.
+ *          { "oauth_timestamp", Long.toString(new Date().getTime() / 1000) },
  *          { "oauth_version", "1.0" },
  *          { "oauth_callback", "oob" },
  *        } );
- *  // OAuthRequestHelper のインスタンス化
- *  // 今回はクエリパラメータにもリクエストボディにも情報を載せないので, 後ろ 2 つの引数は null
- *  OAuthRequestHelper helper = new OAuthRequestHelper( url, method, secrets, paramList, null, null );
- *      // インスタンス化と同時にシグニチャ生成もされるので, あとは helper から情報を取って
- *      // リクエストを送信するだけ
  *
- *  //　リクエスト先への connection 生成
- *  URL u = new URL( helper.getUrlStringIncludeQueryParams() );
- *  HttpURLConnection conn = (HttpURLConnection)u.openConnection();
- *  // リクエストメソッドのセット
- *  conn.setRequestMethod( helper.getRequestMethod() );
- *  // Authorization ヘッダのセット
- *  conn.addRequestProperty( "Authorization", helper.getAuthorizationHeaderString("") );
- *  // 接続
- *  conn.connect();
- *      // 後はレスポンスを受け取って処理する</code></pre>
- *@author nobuoka
+ *  // Instantiate OAuthRequestHelper.
+ *  // In this case, no URI query parameter and no HTTP request body parameters is used,
+ *  // so last two parameters are null.
+ *  OAuthRequestHelper helper = new OAuthRequestHelper(url, method, key, paramList, null, null);
+ *      // Before instantiation of the OAuthRequestHelper is finished, the signature process
+ *      // will be done.
+ *      // Therefore you can send request just after instantiation.
+ *
+ *  // Create HttpURLConnection object.
+ *  URL u = new URL(helper.getUrlStringIncludeQueryParams());
+ *  HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+ *  // Set HTTP request method.
+ *  conn.setRequestMethod(helper.getRequestMethod());
+ *  // Set HTTP Authorization header.
+ *  conn.addRequestProperty("Authorization", helper.getAuthorizationHeaderString(""));
+ *  // Connect.
+ *  conn.connect();</code></pre>
+ *
+ * @author NOBUOKA Yu
  */
 public class OAuthRequestHelper {
 
     /**
-     * リクエスト時に送信する単一のパラメータを表すクラス.
-     * @author nobuoka
-     *
+     * Key-value pair.
+     * This class is used for representing an OAuth parameter, a URI query parameter,
+     * or a "application/x-www-form-urlencoded" entity-body parameter.
      */
     public static class Param {
         private final String mKey;
@@ -79,63 +81,77 @@ public class OAuthRequestHelper {
         public final String getValue() { return mValue; }
     }
 
-    /**
-     * パラメータ同士の比較を行うためのクラス.
-     * OAuth 認証では, パラメータを並べ替える必要があり,
-     * その際にこのクラスのインスタンスを使用する
-     *
-     * @author nobuoka
-     *
-     */
     public static class ParamComparator implements Comparator<Param> {
+        private static ParamComparator instance = null;
+        public static synchronized ParamComparator getInstance() {
+            if (instance == null) instance = new ParamComparator();
+            return instance;
+        }
+
         private ParamComparator() {}
+
+        /**
+         * Compares two parameters lexicographically.
+         * If two parameters have different keys, then two key strings are
+         * compared lexicographically, and the result is returned.
+         * If two keys are same, then two value strings are compared
+         * lexicographically, and the result is returned.
+         */
         @Override
         public int compare(Param o1, Param o2) {
             int r = o1.getKey().compareTo(o2.getKey());
-            if( r == 0 ) {
+            if (r == 0) {
                 return o1.getValue().compareTo(o2.getValue());
             } else {
                 return r;
             }
         }
-        static private ParamComparator instance = null;
-        static public ParamComparator getInstance() {
-            if (instance == null) {
-                instance = new ParamComparator();
-            }
-            return instance;
-        }
     }
 
     /**
-     * パラメータ (Param オブジェクト) のリストを表すクラス.
-     * 実装としては {@code ArrayList<Param>} であり,
-     * パラメータの追加を行いやすいように 2 次元の
-     * String 型配列を受け取るコンストラクタと addAll メソッドが追加されている.
-     *
-     * @author nobuoka
-     *
+     * The list of parameters, which is based on {@code ArrayList<Param>}.
      */
     public static class ParamList extends ArrayList<Param> {
         private static final long serialVersionUID = -849036503227560868L;
+
+        public static ParamList fromArray(String[][] params) {
+            ParamList list = new ParamList(params.length);
+            list.addAll(params);
+            return list;
+        }
+
         public ParamList() {
             super();
         }
+
+        public ParamList(int initialCapacity) {
+            super(initialCapacity);
+        }
+
+        /**
+         * Deprecated. Use {@link ParamList#fromArray(String[][])} instead.
+         */
+        @Deprecated
         public ParamList(String[][] paramStrs) {
             super(paramStrs.length);
             addAll(paramStrs);
         }
+
         private static final String MSG_ADD_ALL_ARG_ELEM_2_LEN =
                 "`paramStrs`, argument of `addAll` method must be an array " +
                 "which element is 2-length Array.";
+
+        /**
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws IllegalArgumentException if some of the specified array's elements are not 2-length array..
+         */
         public void addAll(String[][] paramStrs) {
             List<Param> list = new ArrayList<Param>(paramStrs.length);
             for (String[] ps : paramStrs) {
-                if (ps.length != 2) {
-                    // TODO : 例外処理
+                if (ps == null || ps.length != 2) {
                     throw new IllegalArgumentException(MSG_ADD_ALL_ARG_ELEM_2_LEN);
                 }
-                list.add( new Param(ps[0], ps[1]) );
+                list.add(new Param(ps[0], ps[1]));
             }
             this.addAll(list);
         }
@@ -143,32 +159,48 @@ public class OAuthRequestHelper {
 
     private static final byte[] NONCE_SEED_BYTES =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-            .getBytes( Charset.forName("US-ASCII") );
+            .getBytes(Charset.forName("US-ASCII"));
     private static final String MSG_NONCE_LEN_MUST_POS =
             "Length of nonce string must be positive integer.";
 
     /**
-     *OAuth 認証に用いる nonce 文字列を生成する.
-     *@return 長さ 16 の nonce 文字列
+     * Deprecated. Use {@link #generateNonce()} instead.
      */
+    @Deprecated
     public static String getNonceString() {
-        return getNonceString(16);
+        return generateNonce();
     }
 
     /**
-     *OAuth 認証に用いる nonce 文字列を, 指定の長さで生成する.
-     *@param length 生成する nonce 文字列の長さ
-     *@return 生成した nonce 文字列
+     * Deprecated. Use {@link #generateNonce(int)} instead.
      */
+    @Deprecated
     public static String getNonceString(int length) {
+        return generateNonce(length);
+    }
+
+    /**
+     * Generate a random string, which can be used as a nonce for OAuth 1.0 Protocol.
+     * @return Generated random string, length of which is 16.
+     */
+    public static String generateNonce() {
+        return generateNonce(16);
+    }
+
+    /**
+     * Generate a random string, which can be used as a nonce for OAuth 1.0 Protocol.
+     * @param length The length of generated string.
+     * @return Generated random string, length of which is specified as a parameter.
+     */
+    public static String generateNonce(int length) {
         if (!(length > 0)) throw new IllegalArgumentException(MSG_NONCE_LEN_MUST_POS);
 
         SecureRandom rand = new SecureRandom();
         byte[] bytes = new byte[length];
         for (int i = 0; i < length; i++) {
-            bytes[i] = NONCE_SEED_BYTES[ rand.nextInt(NONCE_SEED_BYTES.length) ];
+            bytes[i] = NONCE_SEED_BYTES[rand.nextInt(NONCE_SEED_BYTES.length)];
         }
-        return new String( bytes, Charset.forName("US-ASCII") );
+        return new String(bytes, Charset.forName("US-ASCII"));
     }
 
     private String mUrlStr;
@@ -180,16 +212,19 @@ public class OAuthRequestHelper {
     private String mSignature;
 
     /**
-     *OAuth 認証を用いた HTTP リクエストに必要な情報を保持した
-     *OAuthRequestHelper オブジェクトを生成する.
+     * Create an {@code OAuthRequestHelper} object, which has the information of
+     * the HTTP request using OAuth 1.0 protocol, such as an URI including request
+     * parameters, OAuth parameters, and request body parameters.
+     * The signature for OAuth 1.0 protocol is generated in the instantiation process.
+     * See: <a href="https://tools.ietf.org/html/rfc5849#section-3.4">RFC 5849 (3.4. Signature)</a>
      *
-     *@param urlStr リクエスト先の URL. クエリーパラメータは含めない
-     *@param method リクエストメソッド. "PUT" や "GET" など
-     *@param secretsStr Consumer secret と token secret を "&amp;" 記号で繋いだ文字列. token secret がない場合は空文字列を使う
-     *@param oauthParams OAuth 認証のためのパラメータのリスト
-     *@param urlQueryParams クエリーパラメータのリスト
-     *@param reqBodyParams リクエストボディに含めるパラメータのリスト
-     *@throws GeneralSecurityException OAuth 認証の署名ができなかった場合に発生する
+     * @param urlStr The base string URI. It must not include request parameters.
+     * @param method The HTTP request method in uppercase. For example: "HEAD", "GET", "POST", etc.
+     * @param secretsStr The concatenated values of the encoded client shared-secret, an "&amp;" character, and the encoded token shared-secret.
+     * @param oauthParams The OAuth parameters except a signature.
+     * @param urlQueryParams The URI query parameters. May be null.
+     * @param reqBodyParams The "application/x-www-form-urlencoded" entity-body parameter. May be null.
+     * @throws GeneralSecurityException thrown when generating a signature is failed.
      */
     public OAuthRequestHelper(String urlStr, String method, String secretsStr,
             ParamList oauthParams, ParamList urlQueryParams, ParamList reqBodyParams)
@@ -204,14 +239,12 @@ public class OAuthRequestHelper {
         sign();
     }
 
-    private String toNormalizationString(Param[] params) {
+    private String toNormalizationString(ParamList params) {
         StringBuilder sb = new StringBuilder();
         for (Param param : params) {
-            if (sb.length() != 0) {
-                sb.append("&");
-            }
-            sb.append( OAuthEncoder.encode(param.getKey()) + "=" );
-            sb.append( OAuthEncoder.encode(param.getValue()) );
+            if (sb.length() != 0) sb.append('&');
+            sb.append(OAuthEncoder.encode(param.getKey())).append('=')
+                    .append(OAuthEncoder.encode(param.getValue()));
         }
         return sb.toString();
     }
@@ -239,15 +272,16 @@ public class OAuthRequestHelper {
 
     // TODO : 例外処理
     private void sign() throws GeneralSecurityException {
+        // See: https://tools.ietf.org/html/rfc5849#section-3.4.1
         final String signatureBaseStr =
-            OAuthEncoder.encode( mMethodStr ) + '&' +
-            OAuthEncoder.encode( mUrlStr ) + '&' +
-            OAuthEncoder.encode( createParameterNormalizationString() );
+            OAuthEncoder.encode(mMethodStr) + '&' +
+            OAuthEncoder.encode(mUrlStr) + '&' +
+            OAuthEncoder.encode(createParameterNormalizationString());
 
         // TODO : 別のアルゴリズムへの対応
         final String algorithmName = "HmacSHA1";
         Key key = new SecretKeySpec(
-                mSecretsStr.getBytes(Charset.forName("US-ASCII")), algorithmName );
+                mSecretsStr.getBytes(Charset.forName("US-ASCII")), algorithmName);
         Mac mac = Mac.getInstance(algorithmName);
         mac.init(key);
         byte[] digest = mac.doFinal(signatureBaseStr.getBytes(Charset.forName("US-ASCII")));
@@ -255,19 +289,26 @@ public class OAuthRequestHelper {
     }
 
     /**
-     *クエリパラメータを含んだ URL を文字列として返す.
-     *OAuth 関係のパラメータはクエリパラメータに含めない.
-     *@return クエリパラメータを含んだ URL の文字列表現
+     * Return the URL string including query parameters.
+     * If you want that the OAuth parameters are included,
+     * use the {@link #getUrlStringIncludeQueryParams(boolean)} method.
+     *
+     * @return The URL string including query parameters.
      */
     public String getUrlStringIncludeQueryParams() {
         return getUrlStringIncludeQueryParams(false);
     }
 
     /**
-     *クエリパラメータを含んだ URL を文字列として返す.
-     *OAuth 関係のパラメータを含めるかどうかは引数によって決める.
-     *@param includeOAuthParams OAuth 関係のパラメータをクエリパラメータに含めるかどうか. 含める場合は true
-     *@return クエリパラメータを含んだ URL の文字列表現
+     * Return the URL string including query parameters.
+     * It generated from the URL specified when this object is instantiated,
+     * which is not included query parameters and
+     * the values of a {@link ParamList} object that specified
+     * as request body parameters when this object is instantiated.
+     * The OAuth parameters will be included in query parameters if you want.
+     *
+     * @param includeOAuthParams tells whether the OAuth parameters are included in query parameters or not
+     * @return The URL string including query parameters.
      */
     public String getUrlStringIncludeQueryParams(boolean includeOAuthParams) {
         ParamList paramList = new ParamList();
@@ -277,24 +318,28 @@ public class OAuthRequestHelper {
         }
         if (mUrlQueryParams != null) paramList.addAll(mUrlQueryParams);
         if (paramList.size() == 0) return mUrlStr;
-        Param[] params = paramList.toArray( new Param[paramList.size()] );
-        return mUrlStr + "?" + toNormalizationString(params);
+        return mUrlStr + "?" + toNormalizationString(paramList);
     }
 
     /**
-     *リクエストボディとして送信すべき値を文字列として取得する.
-     *OAuth 関係のパラメータはクエリパラメータに含めない.
-     *@return リクエストボディとして送信すべき文字列
+     * Return the string to send as a request body.
+     * If you want that the OAuth parameters are included,
+     * use the {@link #getRequestBodyString(boolean)} method.
+     *
+     * @return The string to send as a request body.
      */
     public String getRequestBodyString() {
         return getRequestBodyString(false);
     }
 
     /**
-     *リクエストボディとして送信すべき値を文字列として取得する.
-     *OAuth 関係のパラメータを含めるかどうかは引数によって決める.
-     * @param includeOAuthParams OAuth 関係のパラメータをクエリパラメータに含めるかどうか. 含める場合は true
-     * @return リクエストボディとして送信すべき文字列
+     * Return the string to send as a request body.
+     * It generated from the values of a {@link ParamList} object that specified
+     * as request body parameters when this object is instantiated.
+     * The OAuth parameters will be included if you want.
+     *
+     * @param includeOAuthParams tells whether the OAuth parameters are included or not
+     * @return The string to send as a request body.
      */
     public String getRequestBodyString(boolean includeOAuthParams) {
         ParamList paramList = new ParamList();
@@ -304,25 +349,24 @@ public class OAuthRequestHelper {
         }
         if (mReqBodyParams != null) paramList.addAll(mReqBodyParams);
         if (paramList.size() == 0) return "";
-        Param[] params = paramList.toArray( new Param[paramList.size()] );
-        return toNormalizationString(params);
+        return toNormalizationString(paramList);
     }
 
     /**
-     *HTTP リクエストの Authorization ヘッダとして送信すべき文字列を返す.
-     *形式は以下のようなものである.
-     *<pre>  OAuth realm="...", oauth_timestamp="...", oauth_verifier="...", ...</pre>
-     *@param realmStr realm として含める文字列
-     *@return HTTP リクエストの Authorization ヘッダとして送信すべき文字列
+     * Return the string to send as a value of an HTTP Authorization header.
+     * Following string is the example of the return value.
+     * <pre><code>OAuth realm="...", oauth_timestamp="...", oauth_verifier="...", ...</code><pre>
+     *
+     * @param realm The realm value, which is may be an empty string. Must not be {@code null}.
+     * @return The string to send as a value of an HTTP Authorization header.
      */
-    public String getAuthorizationHeaderString(String realmStr) {
-        // OAuth ヘッダ
+    public String getAuthorizationHeaderString(String realm) {
         StringBuilder sb = new StringBuilder();
-        sb.append( "OAuth realm=\"" + realmStr + "\"" );
-        for( Param p : mOauthParams ) {
-            sb.append( ", " );
-            sb.append( OAuthEncoder.encode(p.getKey()) + "=\"" );
-            sb.append( OAuthEncoder.encode(p.getValue()) + "\"" );
+        sb.append("OAuth realm=\"").append(realm).append('"');
+        for (Param p : mOauthParams) {
+            sb.append(", ");
+            sb.append(OAuthEncoder.encode(p.getKey()));
+            sb.append("=\"").append(OAuthEncoder.encode(p.getValue())).append('"');
         }
         sb.append(", ");
         sb.append("oauth_signature");
@@ -331,8 +375,8 @@ public class OAuthRequestHelper {
     }
 
     /**
-     *リクエストメソッドを返す.
-     *@return インスタンス生成時に指定したリクエストメソッド
+     * Return the request method.
+     * @return The request method that specified when this object is instantiated.
      */
     public String getRequestMethod() {
         return mMethodStr;

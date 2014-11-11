@@ -11,7 +11,35 @@ import org.junit.Test;
 public class OAuthRequestHelperTest {
 
     @Test
-    public void testGetNonceString() {
+    public void test_generateNonce() {
+        String nonceStr;
+
+        nonceStr = OAuthRequestHelper.generateNonce();
+        assertEquals("Default length of nonce is 16", 16, nonceStr.length());
+
+        nonceStr = OAuthRequestHelper.generateNonce(1);
+        assertEquals(1, nonceStr.length());
+
+        nonceStr = OAuthRequestHelper.generateNonce(5);
+        assertEquals(5, nonceStr.length());
+
+        nonceStr = OAuthRequestHelper.generateNonce(200);
+        assertEquals(200, nonceStr.length());
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void test_generateNonce_withZeroLength() {
+        OAuthRequestHelper.generateNonce(0);
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void test_generateNonce_withNegativeLength() {
+        OAuthRequestHelper.generateNonce(-1);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void test_getNonceString() {
         String nonceStr;
 
         nonceStr = OAuthRequestHelper.getNonceString();
@@ -28,12 +56,14 @@ public class OAuthRequestHelperTest {
     }
 
     @Test( expected = IllegalArgumentException.class )
-    public void testGetNonceStringWithZeroLength() {
+    @SuppressWarnings("deprecation")
+    public void test_getNonceString_withZeroLength() {
         OAuthRequestHelper.getNonceString(0);
     }
 
     @Test( expected = IllegalArgumentException.class )
-    public void testGetNonceStringWithNegativeLength() {
+    @SuppressWarnings("deprecation")
+    public void test_getNonceString_withNegativeLength() {
         OAuthRequestHelper.getNonceString(-1);
     }
 
@@ -45,7 +75,7 @@ public class OAuthRequestHelperTest {
         String consumerSecret = "TEST_SECRET==";
         String tokenSecret = "";
         String secrets = OAuthEncoder.encode(consumerSecret) + "&" + OAuthEncoder.encode(tokenSecret);
-        OAuthRequestHelper.ParamList paramList = new OAuthRequestHelper.ParamList(
+        OAuthRequestHelper.ParamList paramList = OAuthRequestHelper.ParamList.fromArray(
               new String[][]{
                 { "oauth_consumer_key", consumerKey },
                 { "oauth_signature_method", "HMAC-SHA1" },
@@ -118,14 +148,14 @@ public class OAuthRequestHelperTest {
         // Test case from RFC 5849.
         // See: https://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
 
-        OAuthRequestHelper.ParamList oauthParams = new OAuthRequestHelper.ParamList(new String[][] {
+        OAuthRequestHelper.ParamList oauthParams = OAuthRequestHelper.ParamList.fromArray(new String[][] {
                 { "oauth_consumer_key", "9djdj82h48djs9d2" },
                 { "oauth_token", "kkk9d7dh3k39sjv7" },
                 { "oauth_signature_method", "HMAC-SHA1" },
                 { "oauth_timestamp", "137131201" },
                 { "oauth_nonce", "7d8f3e4a" },
         });
-        OAuthRequestHelper.ParamList queryParams = new OAuthRequestHelper.ParamList(new String[][] {
+        OAuthRequestHelper.ParamList queryParams = OAuthRequestHelper.ParamList.fromArray(new String[][] {
                 { "b5", "=%3D" },
                 { "a3", "a" },
                 { "c@", "" },
