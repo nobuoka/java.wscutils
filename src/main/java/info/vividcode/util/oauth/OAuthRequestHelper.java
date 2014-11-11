@@ -7,6 +7,7 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -260,7 +261,7 @@ public class OAuthRequestHelper {
         if (mOauthParams    != null) addEncodedKeyValuePairsToParamList(mOauthParams, paramList);
         if (mUrlQueryParams != null) addEncodedKeyValuePairsToParamList(mUrlQueryParams, paramList);
         if (mReqBodyParams  != null) addEncodedKeyValuePairsToParamList(mReqBodyParams, paramList);
-        paramList.sort(ParamComparator.getInstance());
+        Collections.sort(paramList, ParamComparator.getInstance());
 
         StringBuilder sb = new StringBuilder();
         for (Param param : paramList) {
