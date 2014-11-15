@@ -23,3 +23,8 @@ To run tests, execute next command:
 ```
 ./gradlew test
 ```
+
+## License
+
+This project is released under the Apache License, version 2.0.
+Please see the LICENSE file.

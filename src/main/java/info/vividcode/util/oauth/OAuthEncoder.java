@@ -1,3 +1,19 @@
+/*
+Copyright 2011-2014 NOBUOKA Yu
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package info.vividcode.util.oauth;
 
 import java.io.ByteArrayOutputStream;
@@ -39,12 +55,26 @@ public class OAuthEncoder {
      * Encodes a character string using percent-encoding method
      * for OAuth 1.0 Protocol.
      *
-     * @param str the character string to encode
+     * @param str The character string to encode. Must not be null.
      * @return The resulting encoded character string.
      */
     public static String encode(String str) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(str.length());
-        for (byte b : str.getBytes(Charset.forName("UTF-8"))) {
+        // Text values are first encoded as UTF-8 octets per [RFC3629] if
+        // they are not already.
+        // See: RFC 5849, 3.6. Percent Encoding
+        return encode(str.getBytes(Charset.forName("UTF-8")));
+    }
+
+    /**
+     * Encodes a byte array using percent-encoding method
+     * for OAuth 1.0 Protocol.
+     *
+     * @param bytes The byte array to encode. Must not be null.
+     * @return The resulting encoded character string.
+     */
+    public static String encode(byte[] bytes) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream(bytes.length);
+        for (byte b : bytes) {
             if (b < 0 || NEED_ENCODE[b]) {
                 os.write(37); // "%"
                 os.write(BS[(b >> 4) & 0x0F]); // Upper four bits
