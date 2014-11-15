@@ -39,12 +39,26 @@ public class OAuthEncoder {
      * Encodes a character string using percent-encoding method
      * for OAuth 1.0 Protocol.
      *
-     * @param str the character string to encode
+     * @param str The character string to encode. Must not be null.
      * @return The resulting encoded character string.
      */
     public static String encode(String str) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(str.length());
-        for (byte b : str.getBytes(Charset.forName("UTF-8"))) {
+        // Text values are first encoded as UTF-8 octets per [RFC3629] if
+        // they are not already.
+        // See: RFC 5849, 3.6. Percent Encoding
+        return encode(str.getBytes(Charset.forName("UTF-8")));
+    }
+
+    /**
+     * Encodes a byte array using percent-encoding method
+     * for OAuth 1.0 Protocol.
+     *
+     * @param bytes The byte array to encode. Must not be null.
+     * @return The resulting encoded character string.
+     */
+    public static String encode(byte[] bytes) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream(bytes.length);
+        for (byte b : bytes) {
             if (b < 0 || NEED_ENCODE[b]) {
                 os.write(37); // "%"
                 os.write(BS[(b >> 4) & 0x0F]); // Upper four bits
