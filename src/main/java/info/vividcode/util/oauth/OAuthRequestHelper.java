@@ -356,7 +356,7 @@ public class OAuthRequestHelper {
     /**
      * Return the string to send as a value of an HTTP Authorization header.
      * Following string is the example of the return value.
-     * <pre><code>OAuth realm="...", oauth_timestamp="...", oauth_verifier="...", ...</code><pre>
+     * <pre><code>OAuth realm="...", oauth_timestamp="...", oauth_verifier="...", ...</code></pre>
      *
      * @param realm The realm value, which is may be an empty string. Must not be {@code null}.
      * @return The string to send as a value of an HTTP Authorization header.
