@@ -29,7 +29,7 @@ import static java.util.Arrays.asList;
  *
  * @author NOBUOKA Yu
  */
-class UrlEncoded {
+public class UrlEncoded {
 
     /* Byte codes of ASCII-encoded characters "0123456789ABCDEF". */
     private static final char[] HD = { 48,49,50,51,52,53,54,55,56,57,65,66,67,68,69,70 };
